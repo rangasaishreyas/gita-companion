@@ -10,19 +10,21 @@ import { Library } from './screens/Library';
 import { ProgressScreen } from './screens/Progress';
 import { SettingsScreen } from './screens/Settings';
 import { useSettings } from './db/repo';
+import { applyTheme, resolveTheme, themePreview } from './styles/themes';
+import { ThemeSettings } from './screens/ThemeSettings';
+import { CollabScreen } from './screens/Collab';
+import { CollabProvider } from './collab/CollabProvider';
+import { PresenceBar } from './collab/PresenceBar';
+import { CursorLayer } from './collab/CursorLayer';
 
 function useTheme() {
-  const { theme, fontScale } = useSettings();
+  const { theme, fontScale, customThemes, systemLight, systemDark } = useSettings();
   useEffect(() => {
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    const apply = () => {
-      const t = theme === 'system' ? (mq.matches ? 'dark' : 'light') : theme;
-      document.documentElement.dataset.theme = t;
-      document.querySelector('meta[name=theme-color]')?.setAttribute('content', t === 'dark' ? '#15120f' : t === 'sepia' ? '#f1e7d0' : '#faf6ee');
-    };
+    const apply = () => { if (!themePreview.active) applyTheme(resolveTheme(theme, customThemes, systemLight, systemDark, mq.matches).tokens); };
     apply(); mq.addEventListener('change', apply);
     return () => mq.removeEventListener('change', apply);
-  }, [theme]);
+  }, [theme, customThemes, systemLight, systemDark]);
   useEffect(() => { document.documentElement.style.setProperty('--scale', String(fontScale)); }, [fontScale]);
 }
 
@@ -30,6 +32,7 @@ export default function App() {
   useTheme();
   return (
     <HashRouter>
+      <CollabProvider>
       <div className="app">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -41,11 +44,17 @@ export default function App() {
           <Route path="/library" element={<Library />} />
           <Route path="/progress" element={<ProgressScreen />} />
           <Route path="/settings" element={<SettingsScreen />} />
+          <Route path="/settings/theme" element={<ThemeSettings />} />
+          <Route path="/collab" element={<CollabScreen />} />
+          <Route path="/collab/:code" element={<CollabScreen />} />
           <Route path="*" element={<Home />} />
         </Routes>
       </div>
+      <PresenceBar />
+      <CursorLayer />
       <TabBar />
       <ToastHost />
+      </CollabProvider>
     </HashRouter>
   );
 }

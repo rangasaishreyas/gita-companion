@@ -5,6 +5,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Base, type ReadStatus, type Bookmark, type Highlight, type Note, type UserAnecdote, type JournalEntry } from './schema';
 import { parseVerseId } from '../data/loader';
+import type { ThemeDef } from '../styles/themes';
 
 const now = () => Date.now();
 export const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + now().toString(36));
@@ -88,7 +89,16 @@ export const deleteJournal = (id: string) => softDelete('journal', id);
 
 // ---------- settings ----------
 export interface Settings {
-  theme: 'light' | 'dark' | 'sepia' | 'system';
+  /** 'system', a preset id, or a custom theme id */
+  theme: string;
+  systemLight: string;
+  systemDark: string;
+  customThemes: ThemeDef[];
+  /** collab profile & preferences */
+  collabName: string;
+  collabColor: string;
+  showCursors: boolean;
+  shareCursor: boolean;
   fontScale: number;
   showTranslit: boolean;
   showWordMeanings: boolean;
@@ -100,9 +110,11 @@ export interface Settings {
   autoMarkRead: boolean;
 }
 export const defaultSettings: Settings = {
-  theme: 'system', fontScale: 1, showTranslit: true, showWordMeanings: false,
+  theme: 'system', systemLight: 'saffron', systemDark: 'night', customThemes: [],
+  collabName: '', collabColor: '#e4572e', showCursors: true, shareCursor: true,
+  fontScale: 1, showTranslit: true, showWordMeanings: false,
   defaultTranslator: '16:english', pinnedTranslators: ['16:english', '19:english', '1:hindi'],
-  commentaryLangs: ['english', 'hindi', 'sanskrit'], autoMarkRead: true,
+  commentaryLangs: ['english', 'hindi', 'sanskrit'], autoMarkRead: true, lastCommentator: 'vs-sankar:english',
 };
 export function useSettings(): Settings {
   const rows = useLiveQuery(() => db.settings.toArray(), [], undefined);

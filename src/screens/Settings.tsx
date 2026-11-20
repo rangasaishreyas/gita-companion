@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { TopBar } from '../components/TopBar';
 import { Icon } from '../components/Icon';
 import { toast } from '../components/Toast';
@@ -21,8 +22,12 @@ export function SettingsScreen() {
       <div className="page">
         <div className="section-title">Reading</div>
         <div className="card">
+          <Link className="setting" to="/settings/theme">
+            <div className="l">Theme & colours<small>11 colour themes, or customise every colour</small></div>
+            <span style={{ width: 18, color: 'var(--muted)', display: 'inline-flex' }}><Icon name="next" /></span>
+          </Link>
           <button className="setting" style={{ width: '100%', textAlign: 'left' }} onClick={() => setDisplay(true)}>
-            <div className="l">Text, theme & translations<small>Size, theme, transliteration, main translation, commentary languages</small></div>
+            <div className="l">Text & translations<small>Size, transliteration, main translation, commentary languages</small></div>
             <span style={{ width: 18, color: 'var(--muted)', display: 'inline-flex' }}><Icon name="next" /></span>
           </button>
           <button className="setting" style={{ width: '100%', textAlign: 'left' }} onClick={() => setSetting('autoMarkRead', !s.autoMarkRead)}>
@@ -37,7 +42,7 @@ export function SettingsScreen() {
             try { await downloadAll((d, t) => setDl(`${Math.round((d / t) * 100)}%`)); setDl('done'); toast('Everything is available offline'); }
             catch { setDl(null); toast('Download failed, check your connection'); }
           }}>
-            <div className="l">Download everything for offline<small>{dl === 'done' ? 'All chapters and commentaries saved on this device' : dl ? `Downloading… ${dl}` : 'About 27 MB: all verses, translations and commentaries'}</small></div>
+            <div className="l">Download everything for offline<small>{dl === 'done' ? 'All chapters and commentaries saved on this device' : dl ? `Downloading… ${dl}` : 'About 30 MB: all verses, translations and commentaries'}</small></div>
             <span style={{ width: 22, color: 'var(--accent)', display: 'inline-flex' }}><Icon name={dl === 'done' ? 'check' : 'download'} /></span>
           </button>
         </div>
@@ -71,7 +76,7 @@ export function SettingsScreen() {
 
         <div className="section-title">About</div>
         <div className="card" style={{ padding: 16 }}>
-          <p className="small" style={{ marginTop: 0 }}>Sanskrit text, transliteration, word meanings, translations and commentaries come from the <b>gita/gita</b> open dataset (public domain, Unlicense). Stories marked “Story”, “Context”, “History” or “Reflection” are short retellings written for this app, with their sources noted.</p>
+          <p className="small" style={{ marginTop: 0 }}>Sanskrit text, transliteration, word meanings, translations and commentaries come from the <b>gita/gita</b> open dataset (public domain, Unlicense). The English Shankaracharya, Ramanujacharya and Abhinavagupta commentaries and Prabhupada's translation and purports come from <b>vedicscriptures/bhagavad-gita-data</b> (GPL-3.0); the original translations remain the work and copyright of their translators and publishers. Stories marked “Story”, “Context”, “History” or “Reflection” are short retellings written for this app, with their sources noted.</p>
           <p className="small muted" style={{ marginBottom: 0 }}>{index.data ? `${index.data.translators.length} translators · ${index.data.commentators.length} commentators` : ''}</p>
         </div>
       </div>

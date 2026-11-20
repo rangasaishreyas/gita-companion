@@ -86,6 +86,16 @@ export function Home() {
           </>
         )}
 
+        <div className="section-title">Together</div>
+        <Link to="/collab" className="card" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 16 }}>
+          <span style={{ width: 24, color: 'var(--accent)', display: 'inline-flex' }}><Icon name="users" /></span>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontFamily: 'var(--serif)', fontWeight: 600 }}>Study together</div>
+            <div className="small muted">Voice chat and explore verses with friends</div>
+          </div>
+          <span style={{ width: 18, color: 'var(--muted)', display: 'inline-flex' }}><Icon name="next" /></span>
+        </Link>
+
         <div className="section-title">Reflect</div>
         <Link to="/journal/new" className="card" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 16 }}>
           <span style={{ width: 24, color: 'var(--accent)', display: 'inline-flex' }}><Icon name="journal" /></span>

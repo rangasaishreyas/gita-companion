@@ -10,6 +10,7 @@ import { loadChapter, loadCommentary, loadIndex } from '../data/loader';
 import { useAsync } from '../data/useAsync';
 import type { Author } from '../data/types';
 import { anecdotesFor } from '../content/anecdotes';
+import { presets } from '../styles/themes';
 import type { Highlight, Note, ReadStatus, UserAnecdote } from '../db/schema';
 import {
   useSettings, setSetting, useVerseStatus, setStatus, autoMarkRead, useIsBookmarked, toggleBookmark,
@@ -104,12 +105,13 @@ export function VerseScreen() {
           <button className={'iconbtn' + (bookmarked ? ' on' : '')} aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark'} onClick={async () => { await toggleBookmark(verseId); toast(bookmarked ? 'Bookmark removed' : 'Bookmarked'); }}>
             <Icon name="bookmark" fill={bookmarked} />
           </button>
+          <Link className="iconbtn" aria-label="Study together" to="/collab"><Icon name="users" /></Link>
           <button className="iconbtn" aria-label="Reading settings" onClick={() => setDisplaySheet(true)}><Icon name="text" /></button>
         </>} />
 
-      <article className="verse" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+      <article className="verse" data-anchor="verse" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
         <HighlightText className="sa" text={verse.sa} source="sa" sourceLabel="Sanskrit" lang="sa" highlights={highlights} onTapHighlight={setEditHl} />
-        {settings.showTranslit && <div className="tr">{verse.tr}</div>}
+        {settings.showTranslit && <div className="tr" data-anchor="translit">{verse.tr}</div>}
 
         {lead && (
           <div className="lead">
@@ -125,7 +127,7 @@ export function VerseScreen() {
         </button>
         {showWM && <WordMeanings wm={verse.wm} />}
 
-        <div className="tabs" role="tablist">
+        <div className="tabs" role="tablist" data-anchor="tabs">
           <button className={tab === 'translations' ? 'on' : ''} onClick={() => setTab('translations')}>Translations<span className="count">{verse.t.length}</span></button>
           <button className={tab === 'commentary' ? 'on' : ''} onClick={() => setTab('commentary')}>Commentary</button>
           <button className={tab === 'stories' ? 'on' : ''} onClick={() => setTab('stories')}>Stories{curated.length + userAnecdotes.length > 0 && <span className="count">{curated.length + userAnecdotes.length}</span>}</button>
@@ -197,7 +199,7 @@ export function VerseScreen() {
           )}
         </div>
 
-        <div className="navfoot">
+        <div className="navfoot" data-anchor="navfoot">
           {prev ? <Link replace className="card" to={prev}><div className="k">← Previous</div><div className="v">{prev.split('/').slice(2).join('.')}</div></Link> : <span style={{ flex: 1 }} />}
           {next ? <Link replace className="card" style={{ textAlign: 'right' }} to={next}><div className="k">Next →</div><div className="v">{next.split('/').slice(2).join('.')}</div></Link> : <span style={{ flex: 1 }} />}
         </div>
@@ -228,7 +230,7 @@ function StatusBar({ status, onSet }: { status: ReadStatus; onSet: (s: ReadStatu
     { s: 'read', label: 'Read', icon: 'check' }, { s: 'revisit', label: 'Revisit', icon: 'refresh' }, { s: 'unread', label: 'Unread' },
   ];
   return (
-    <div className="statusbar" role="group" aria-label="Reading status">
+    <div className="statusbar" role="group" aria-label="Reading status" data-anchor="status">
       {opts.map((o) => (
         <button key={o.s} className={`status ${o.s}` + (status === o.s ? ' on' : '')} aria-pressed={status === o.s} onClick={() => onSet(o.s)}>
           {o.icon && <span style={{ width: 16, height: 16, display: 'inline-flex' }}><Icon name={o.icon} /></span>}{o.label}
@@ -241,7 +243,7 @@ function StatusBar({ status, onSet }: { status: ReadStatus; onSet: (s: ReadStatu
 function WordMeanings({ wm }: { wm: string }) {
   const parts = wm.split(/;\s*/).map((p) => p.split('—'));
   return (
-    <div className="card wm" style={{ padding: '12px 16px' }}>
+    <div className="card wm" data-anchor="wm" style={{ padding: '12px 16px' }}>
       {parts.map(([w, m], i) => <span key={i}><b>{w}</b>{m ? ` — ${m}` : ''}{i < parts.length - 1 ? '; ' : ''}</span>)}
     </div>
   );
@@ -299,7 +301,7 @@ function Commentary({ chapter, verse, commentators, langs, selected, highlights,
         {available.map((x) => {
           const au = commentators.find((y) => y.id === x.a)!;
           return <button key={x.a} className={'chip' + (x.a === cur.a ? ' on' : '')} onClick={() => setSetting('lastCommentator', x.a)}>
-            {au.author.replace(/^(Sri|Swami|Shri) /, '')} <span style={{ opacity: .7, fontSize: '.75em' }}>{langLabel(au.lang).slice(0, 2)}</span>
+            {au.author.replace(/^(Sri|Swami|Shri) /, '').replace(/ \(tr\. [^)]*\)/, '').replace('A.C. Bhaktivedanta Swami ', '')} <span style={{ opacity: .7, fontSize: '.75em' }}>{langLabel(au.lang).slice(0, 2)}</span>
           </button>;
         })}
       </div>
@@ -319,8 +321,16 @@ export function DisplaySheet({ open, onClose, translators }: { open: boolean; on
         <div className="setting"><div className="l">Text size</div>
           <div className="seg">{[0.9, 1, 1.15, 1.3].map((f) => <button key={f} className={s.fontScale === f ? 'on' : ''} onClick={() => setSetting('fontScale', f)} style={{ fontSize: `${f * 0.85}rem` }}>A</button>)}</div>
         </div>
-        <div className="setting"><div className="l">Theme</div>
-          <div className="seg">{(['system', 'light', 'sepia', 'dark'] as const).map((t) => <button key={t} className={s.theme === t ? 'on' : ''} onClick={() => setSetting('theme', t)}>{t[0].toUpperCase() + t.slice(1)}</button>)}</div>
+        <div className="setting" style={{ flexWrap: 'wrap' }}><div className="l">Theme</div>
+          <Link to="/settings/theme" className="btn ghost" style={{ minHeight: 32 }} onClick={onClose}>All colours</Link>
+          <div className="theme-swatches">
+            <button className={'tsw' + (s.theme === 'system' ? ' on' : '')} onClick={() => setSetting('theme', 'system')} aria-label="Match system" title="Match system"
+              style={{ background: 'linear-gradient(135deg, #faf6ee 50%, #15120f 50%)' }} />
+            {[...presets, ...s.customThemes].map((p) => (
+              <button key={p.id} className={'tsw' + (s.theme === p.id ? ' on' : '')} onClick={() => setSetting('theme', p.id)} aria-label={p.name} title={p.name}
+                style={{ background: `linear-gradient(135deg, ${p.tokens.bg} 50%, ${p.tokens.accent} 50%)` }} />
+            ))}
+          </div>
         </div>
         <button className="setting" style={{ width: '100%', textAlign: 'left' }} onClick={() => setSetting('showTranslit', !s.showTranslit)}>
           <div className="l">Show transliteration</div><span className={'switch' + (s.showTranslit ? ' on' : '')} />
